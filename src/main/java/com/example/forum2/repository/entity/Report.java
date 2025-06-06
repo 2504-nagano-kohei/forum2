@@ -23,5 +23,6 @@ public class Report {
 
     @Column
     private String content;
+
     
 }
