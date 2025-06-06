@@ -1,0 +1,32 @@
+<!-- ⑨フロント側：トップ画面の作成 -->
+<!-- 「th:~」と表記 -> Thymeleaf -->
+<!-- th:action → アクションの内容を置換する(@{}でコンテキスト・パスを相対から絶対へ) -->
+<!-- 条件分岐→　th:if=""   多項分岐→switchもある-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="styleSheet">
+    <title>TOP</title>
+</head>
+<body>
+<div class="header-contents">
+    <h1>匿名掲示板</h1>
+</div>
+<div class="main-contents">
+    <a href="/new">
+        <button class="new-button" type="button">新規投稿</button>
+    </a>
+    <div class="message-icon" th:each="content : ${contents}">
+        <div>
+            <!-- th:text → 値を表示する -->
+            <!-- ${content.id} → Controllerから値を引き渡す役割。content.idに何か値があれば動的に表示 -->
+            ID : <span th:text="${content.id}"/>
+        </div>
+        <div class="text">
+            投稿 : <span th:text="${content.content}"/>
+        </div>
+    </div>
+</div>
+</body>
+</html>
