@@ -1,12 +1,13 @@
 package com.example.forum2.controller;
 
+import com.example.forum2.controller.form.CommentForm;
 import com.example.forum2.controller.form.ReportForm;
+import com.example.forum2.repository.entity.Comment;
+import com.example.forum2.service.CommentService;
 import com.example.forum2.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.List;
 public class ForumController {
     @Autowired
     ReportService reportService;
+    @Autowired
+    CommentService commentService;
 
     /*
      * ⑤投稿内容表示処理
@@ -24,10 +27,14 @@ public class ForumController {
         ModelAndView mav = new ModelAndView();
         // 投稿を全件取得
         List<ReportForm> contentData = reportService.findAllReport();
+        // コメントを全件取得
+        List<CommentForm> commentData = commentService.findAllComment();
         // 画面遷移先(「現在のURL」/top )を指定
         mav.setViewName("/top");
         // 投稿データオブジェクト(contentData)を保管
         mav.addObject("contents", contentData);
+        // コメントデータオブジェクト(commentData)を保管
+        mav.addObject("comments", commentData);
         return mav;
     }
 
@@ -54,9 +61,93 @@ public class ForumController {
      */
     @PostMapping("/add")
     public ModelAndView addContent(@ModelAttribute("formModel") ReportForm reportForm){
-        // Report型の変数reportを引数として、ReportServiceのsaveReportを実行(投稿をテーブルに格納)
+        // ReportForm型の変数reportFormを引数として、ReportServiceのsaveReportを実行(投稿をテーブルに格納)
         reportService.saveReport(reportForm);
         // root(⑤)へリダイレクト
         return new ModelAndView("redirect:/");
     }
+
+    /*
+     * 投稿削除
+     */
+    @DeleteMapping("/delete/{id}")
+    // @PathVariableでformタグ内のaction属性に記述されてる{}内で指定されたURLパラメータを取得
+    // th:action="@{/delete/{id}(id=${content.id})" の{id}のところ
+    public ModelAndView deleteContent(@PathVariable Integer id) {
+        // reportServiceにidを引数にして渡す。➡ReportRepositoryに渡してDELETE文実行
+        reportService.deleteReport(id);
+        // root（⑤）へリダイレクト
+        return new ModelAndView("redirect:/");
+    }
+
+    /*
+     * 編集画面に遷移
+     */
+    @GetMapping("/edit/{id}")
+    public ModelAndView editContent(@PathVariable Integer id) {
+        ModelAndView mav = new ModelAndView();
+        // テーブルから編集する投稿を取得してくる（idと投稿内容を変数reportへ格納）
+        ReportForm report = reportService.editReport(id);
+        // 編集する投稿をmavにセット
+        mav.addObject("formModel", report);
+        // 画面遷移先を指定
+        mav.setViewName("/edit");
+        return mav;
+    }
+
+    /*
+     * 編集処理
+     */
+    @PutMapping("/update/{id}")
+    // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
+    public ModelAndView updateContent (@PathVariable Integer id,
+                                       @ModelAttribute("formModel") ReportForm report) {
+        // UrlParameterのidを更新するentityにセット
+        report.setId(id);
+        // 編集した投稿を更新
+        reportService.saveReport(report);
+        // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
+        return new ModelAndView("redirect:/");
+    }
+
+    /*
+     * コメント投稿処理
+     */
+    @PostMapping("/addComment")
+    public ModelAndView addComment(@ModelAttribute("commentModel") CommentForm commentForm){
+        commentService.saveComment(commentForm);
+        return new ModelAndView("redirect:/");
+    }
+
+
+    /*
+     * コメント編集画面の表示処理　★課題：コメント編集機能追加
+     */
+    @GetMapping("/editComment/{id}")
+    public ModelAndView editComment(@PathVariable Integer id) {
+        ModelAndView mav = new ModelAndView();
+        // 編集する投稿を取得
+        CommentForm comment = commentService.editComment(id);
+        // 編集する投稿をセット
+        mav.addObject("commentForm", comment);
+        // 画面遷移先を指定
+        mav.setViewName("/editComment");
+        return mav;
+    }
+
+    /*
+     * コメント編集処理
+     */
+    @PutMapping("/updateComment/{id}")
+    // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
+    public ModelAndView updateComment (@PathVariable Integer id,
+                                       @ModelAttribute("commentModel") CommentForm comment) {
+        // UrlParameterのidを更新するentityにセット
+        comment.setId(id);
+        // 編集した投稿を更新
+        commentService.saveComment(comment);
+        // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
+        return new ModelAndView("redirect:/");
+    }
+
 }

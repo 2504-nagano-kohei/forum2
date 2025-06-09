@@ -19,7 +19,7 @@ public class ReportService {
      */
     public List<ReportForm> findAllReport() {
         // reportRepositoryのfindAllを実行
-        List<Report> results = reportRepository.findAll();
+        List<Report> results = reportRepository.findAllByOrderByIdDesc();
         // その値をsetReportFormメソッドでEntity→Formに詰め直し
         List<ReportForm> reports = setReportForm(results);
         // Controllerに戻している。
@@ -48,8 +48,9 @@ public class ReportService {
      */
     public void saveReport(ReportForm reqReport) {
         Report saveReport = setReportEntity(reqReport);
-        // ReportRepositoryのsaveメソッドはテーブルに新規投稿をinsertするような処理になっている
-        // その他にもsaveメソッドには、update文のような処理も兼ね備えている
+        // ReportRepositoryのsaveメソッドはテーブルに新規投稿をinsertするような処理や、update文のような処理も兼ね備えている
+        // 「id が既に存在するかどうかをDBから確認➡存在する id であればmergeメソッド（SQL文でいうupdateの処理）が行われて、
+        // 存在しないidであればpersistメソッド（SQL文でいう insert の処理）が行われる」
         reportRepository.save(saveReport);
     }
 
@@ -62,4 +63,27 @@ public class ReportService {
         report.setContent(reqReport.getContent());
         return report;
     }
+
+    /*
+     * 投稿削除
+     */
+    public void deleteReport(Integer id) {
+        reportRepository.deleteById(id);
+    }
+
+
+    /*
+     * 編集する投稿のレコードを1件取得
+     */
+    public ReportForm editReport(Integer id) {
+        // Report型のリストを用意し
+        List<Report> results = new ArrayList<>();
+        // reportRepositoryのfindById(id)メソッドで抽出しで詰める
+        results.add((Report) reportRepository.findById(id).orElse(null));
+        // 詰めたものをsetReportFormメソッドでEntityに詰め替え、ReportForm型のリストに詰める
+        List<ReportForm> reports = setReportForm(results);
+        return reports.get(0);
+    }
+
+
 }

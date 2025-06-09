@@ -26,6 +26,47 @@
         <div class="text">
             投稿 : <span th:text="${content.content}"/>
         </div>
+        <!-- 削除ボタン -->
+        <div class="delete-button">
+            <form th:action="@{/delete/{id}(id=${content.id})}" th:method="delete">
+                <!-- 自動的にPOST送信 -->
+                <!-- 「<input type=”hidden” name=”_method” value=”delete”>」も自動的に追記される -->
+                <input type="submit" th:value="削除">
+            </form>
+        </div>
+        <!-- 編集ボタン -->
+        <div>
+            <a th:href="@{/edit/{id}(id=${content.id})}">
+                <input type="button" th:value="編集">
+            </a>
+        </div>
+        <!-- コメントエリア -->
+        <div>
+            <form method="post" action="/addComment">
+                <!-- コメントエリア -->
+                <div class="comment-area">
+                    <label>コメント内容</label>
+                    <textarea class="comment-box" name="comment" size="20" maxlength="200"></textarea><br/>
+                    <input name="messageId" th:value="${content.id}" type="hidden">
+                    <!-- コメント「返信ボタン」 -->
+                    <input type="submit" value="コメントする" />
+                </div>
+            </form>
+        </div>
+        <!-- 投稿IDに紐づいたコメントの一覧表示 -->
+        <div class="message-icon" th:each="comment : ${comments}">
+            <div th:if="${comment.messageId} == ${content.id}">
+                <div class="comment">
+                    コメント : <span th:text="${comment.comment}"/>
+                </div>
+                <!-- コメント編集ボタン -->
+                <div class="edit-button">
+                    <a th:href="@{/editComment/{id}(id=${comment.id})}">
+                        <input type="button" th:value="編集">
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="styleSheet">
+    <title>コメントの編集</title>
+</head>
+<body>
+<div class="header-contents">
+    <h2>コメントの編集</h2>
+</div>
+<div class="main-contents">
+    <form th:action="@{/updateComment/{id}(id=${commentModel.id})}" th:object="${commentModel}" th:method="put">
+        <div class="form-area">
+            <label>コメント内容</label>
+            <!-- 編集画面に遷移した際に、値が保持されるべきなので、textarea 要素内に「th:field="*{content}"」 と記載して値の保持を行う -->
+            <textarea class="tweet-box" name="comment" th:field="*{comment}" size="20" maxlength="200" /></textarea><br/>
+            <input type="submit" value="更新"/>
+        </div>
+    </form>
+</div>
+<div class="footer-contents">
+    <form action="/">
+        <input type="submit" value="戻る" />
+    </form>
+</div>
+</body>
+</html>

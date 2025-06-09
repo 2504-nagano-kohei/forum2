@@ -1,4 +1,4 @@
-// ④サーバー側：entityの作成
+// サーバー側：entityの作成
 // データアクセス時に使用するJavaBeansのような入れ物
 package com.example.forum2.repository.entity;
 
@@ -14,17 +14,20 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name = "report2")
+@Table(name = "comment2")
 @Getter
 @Setter
-public class Report {
+public class Comment {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column
-    private String content;
+    private String comment;
+
+    @Column
+    private int messageId;
 
     @Column(name = "created_date", insertable = false, updatable = false)
     private Date createdDate;
