@@ -1,9 +1,11 @@
 package com.example.forum2.repository;
 
+import com.example.forum2.repository.entity.Comment;
 import com.example.forum2.repository.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -12,5 +14,5 @@ import java.util.List;
 // JpaRepositryにはあらかじめいくつかのメソッドが定義されており、SQL文を打つ必要がない。
 // findAllで実行されている処理はSQL文の「select * from report;」のようなイメージ
 public interface ReportRepository extends JpaRepository<Report, Integer> {
-    List<Report> findAllByOrderByIdDesc();
+    List<Report> findByCreatedDateBetweenOrderByUpdatedDateDesc(Date start, Date end);
 }

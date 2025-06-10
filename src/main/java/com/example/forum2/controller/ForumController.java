@@ -5,11 +5,13 @@ import com.example.forum2.controller.form.ReportForm;
 import com.example.forum2.repository.entity.Comment;
 import com.example.forum2.service.CommentService;
 import com.example.forum2.service.ReportService;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.text.ParseException;
 import java.util.List;
 
 @Controller
@@ -23,10 +25,11 @@ public class ForumController {
      * ⑤投稿内容表示処理
      */
     @GetMapping
-    public ModelAndView top() {
+    public ModelAndView top(@RequestParam(name="startDate", required=false) String startDate,
+                            @RequestParam(name="endDate", required=false) String endDate) throws ParseException  {
         ModelAndView mav = new ModelAndView();
         // 投稿を全件取得
-        List<ReportForm> contentData = reportService.findAllReport();
+        List<ReportForm> contentData = reportService.findAllReport(startDate, endDate);
         // コメントを全件取得
         List<CommentForm> commentData = commentService.findAllComment();
         // 画面遷移先(「現在のURL」/top )を指定
@@ -60,7 +63,7 @@ public class ForumController {
      * ⑧新規投稿処理
      */
     @PostMapping("/add")
-    public ModelAndView addContent(@ModelAttribute("formModel") ReportForm reportForm){
+    public ModelAndView addContent(@ModelAttribute("formModel") ReportForm reportForm) throws ParseException {
         // ReportForm型の変数reportFormを引数として、ReportServiceのsaveReportを実行(投稿をテーブルに格納)
         reportService.saveReport(reportForm);
         // root(⑤)へリダイレクト
@@ -101,7 +104,7 @@ public class ForumController {
     @PutMapping("/update/{id}")
     // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
     public ModelAndView updateContent (@PathVariable Integer id,
-                                       @ModelAttribute("formModel") ReportForm report) {
+                                       @ModelAttribute("formModel") ReportForm report) throws ParseException{
         // UrlParameterのidを更新するentityにセット
         report.setId(id);
         // 編集した投稿を更新
@@ -114,14 +117,14 @@ public class ForumController {
      * コメント投稿処理
      */
     @PostMapping("/addComment")
-    public ModelAndView addComment(@ModelAttribute("commentModel") CommentForm commentForm){
+    public ModelAndView addComment(@ModelAttribute("commentModel") CommentForm commentForm) throws ParseException {
         commentService.saveComment(commentForm);
         return new ModelAndView("redirect:/");
     }
 
 
     /*
-     * コメント編集画面の表示処理　★課題：コメント編集機能追加
+     * コメント編集画面を表示
      */
     @GetMapping("/editComment/{id}")
     public ModelAndView editComment(@PathVariable Integer id) {
@@ -129,7 +132,7 @@ public class ForumController {
         // 編集する投稿を取得
         CommentForm comment = commentService.editComment(id);
         // 編集する投稿をセット
-        mav.addObject("commentForm", comment);
+        mav.addObject("commentModel", comment);
         // 画面遷移先を指定
         mav.setViewName("/editComment");
         return mav;
@@ -141,12 +144,22 @@ public class ForumController {
     @PutMapping("/updateComment/{id}")
     // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
     public ModelAndView updateComment (@PathVariable Integer id,
-                                       @ModelAttribute("commentModel") CommentForm comment) {
+                                       @ModelAttribute("commentModel") CommentForm comment) throws ParseException {
         // UrlParameterのidを更新するentityにセット
         comment.setId(id);
         // 編集した投稿を更新
         commentService.saveComment(comment);
+        // 投稿のupdatedDateを更新
         // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
+        return new ModelAndView("redirect:/");
+    }
+
+    /*
+     * コメント削除
+     */
+    @DeleteMapping("/deleteComment/{id}")
+    public ModelAndView deleteComment(@PathVariable Integer id) {
+        commentService.deleteComment(id);
         return new ModelAndView("redirect:/");
     }
 

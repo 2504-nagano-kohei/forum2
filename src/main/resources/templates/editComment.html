@@ -14,7 +14,8 @@
         <div class="form-area">
             <label>コメント内容</label>
             <!-- 編集画面に遷移した際に、値が保持されるべきなので、textarea 要素内に「th:field="*{content}"」 と記載して値の保持を行う -->
-            <textarea class="tweet-box" name="comment" th:field="*{comment}" size="20" maxlength="200" /></textarea><br/>
+            <textarea class="tweet-box" th:field="*{comment}" size="20" maxlength="200" /></textarea><br/>
+            <input type="hidden" th:field="*{messageId}">
             <input type="submit" value="更新"/>
         </div>
     </form>

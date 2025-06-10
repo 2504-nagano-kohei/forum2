@@ -12,5 +12,5 @@ import java.util.List;
 // JpaRepositryにはあらかじめいくつかのメソッドが定義されており、SQL文を打つ必要がない。
 // findAllで実行されている処理はSQL文の「select * from report;」のようなイメージ
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    public List<Comment> findAllByOrderByIdDesc();
+    List<Comment> findByOrderByUpdatedDateDesc();
 }

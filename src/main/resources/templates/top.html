@@ -14,6 +14,16 @@
     <h1>匿名掲示板</h1>
 </div>
 <div class="main-contents">
+    <!-- 絞り込みボタン -->
+    <div>
+        <form th:action="@{/}" th:method="get">
+            日付
+            <input type="date" name="startDate" value="${startDate}">
+            ～
+            <input type="date" name="endDate" value="${endDate}">
+            <input type="submit" value="絞り込み">
+        </form>
+    </div>
     <a href="/new">
         <button class="new-button" type="button">新規投稿</button>
     </a>
@@ -64,6 +74,12 @@
                     <a th:href="@{/editComment/{id}(id=${comment.id})}">
                         <input type="button" th:value="編集">
                     </a>
+                </div>
+                <!-- コメント削除ボタン -->
+                <div class="delete-button">
+                    <form th:action="@{/deleteComment/{id}(id=${comment.id})}" th:method="delete">
+                        <input type="submit" th:value="削除">
+                    </form>
                 </div>
             </div>
         </div>
