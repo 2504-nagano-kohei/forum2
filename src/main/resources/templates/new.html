@@ -14,9 +14,13 @@
     <form method="post" action="/add" th:object="${formModel}">
         <div class="form-area">
             <label>投稿内容</label>
-            <textarea class="tweet-box" th:field="*{content}" size="20" maxlength="200" /></textarea><br/>
+            <textarea class="tweet-box" th:field="*{content}" size="20" maxlength="200"></textarea><br/>
             <!-- 一つ目のform属性の投稿ボタンを押すと、
             「th:field="*{content}"」がサーバー側に渡されてDBにinsertされていくような流れ -->
+            <!-- エラーメッセージ表示エリア -->
+            <div th:if="${#fields.hasErrors('content')}" style="color:red;">
+                <p th:errors="*{content}"></p>
+            </div>
             <input type="submit" value="投稿" />
         </div>
     </form>

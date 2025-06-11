@@ -2,12 +2,15 @@ package com.example.forum2.controller;
 
 import com.example.forum2.controller.form.CommentForm;
 import com.example.forum2.controller.form.ReportForm;
-import com.example.forum2.repository.entity.Comment;
 import com.example.forum2.service.CommentService;
 import com.example.forum2.service.ReportService;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,6 +23,8 @@ public class ForumController {
     ReportService reportService;
     @Autowired
     CommentService commentService;
+    @Autowired
+    HttpSession session;
 
     /*
      * ⑤投稿内容表示処理
@@ -33,11 +38,19 @@ public class ForumController {
         // コメントを全件取得
         List<CommentForm> commentData = commentService.findAllComment();
         // 画面遷移先(「現在のURL」/top )を指定
-        mav.setViewName("/top");
+        mav.setViewName("top");
         // 投稿データオブジェクト(contentData)を保管
         mav.addObject("contents", contentData);
         // コメントデータオブジェクト(commentData)を保管
         mav.addObject("comments", commentData);
+        // セッションにデータがあれば、エラーフォームを渡す（なければ新規）
+        Object commentFormObj = session.getAttribute("commentModel");
+        if (commentFormObj != null) {
+            mav.addObject("commentModel", commentFormObj);
+            session.removeAttribute("commentModel");
+        } else {
+            mav.addObject("commentModel", new CommentForm());
+        }
         return mav;
     }
 
@@ -63,7 +76,15 @@ public class ForumController {
      * ⑧新規投稿処理
      */
     @PostMapping("/add")
-    public ModelAndView addContent(@ModelAttribute("formModel") ReportForm reportForm) throws ParseException {
+    public ModelAndView addContent(@Validated @ModelAttribute("formModel") ReportForm reportForm,
+                                   BindingResult result) throws ParseException {
+        if(result.hasErrors()) {
+            //エラー処理
+            ModelAndView mav = new ModelAndView();
+            mav.setViewName("/new");
+            mav.addObject("formModel", reportForm); // 入力内容を保持
+            return mav;
+        }
         // ReportForm型の変数reportFormを引数として、ReportServiceのsaveReportを実行(投稿をテーブルに格納)
         reportService.saveReport(reportForm);
         // root(⑤)へリダイレクト
@@ -104,11 +125,19 @@ public class ForumController {
     @PutMapping("/update/{id}")
     // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
     public ModelAndView updateContent (@PathVariable Integer id,
-                                       @ModelAttribute("formModel") ReportForm report) throws ParseException{
+                                       @Validated @ModelAttribute("formModel") ReportForm reportForm,
+                                       BindingResult result) throws ParseException{
+        if(result.hasErrors()) {
+            //エラー処理
+            ModelAndView mav = new ModelAndView();
+            mav.setViewName("/edit");
+            mav.addObject("formModel", reportForm); // 入力内容を保持
+            return mav;
+        }
         // UrlParameterのidを更新するentityにセット
-        report.setId(id);
+        reportForm.setId(id);
         // 編集した投稿を更新
-        reportService.saveReport(report);
+        reportService.saveReport(reportForm);
         // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
         return new ModelAndView("redirect:/");
     }
@@ -117,7 +146,14 @@ public class ForumController {
      * コメント投稿処理
      */
     @PostMapping("/addComment")
-    public ModelAndView addComment(@ModelAttribute("commentModel") CommentForm commentForm) throws ParseException {
+    public ModelAndView addComment(@Validated @ModelAttribute("commentModel") CommentForm commentForm,
+                                   BindingResult result) throws ParseException {
+        if(result.hasErrors()) {
+            // セッションにエラー情報と入力値を入れる
+            // session.setAttribute("commentErrors", result);
+            session.setAttribute("commentModel", commentForm);
+            return new ModelAndView("redirect:/");
+        }
         commentService.saveComment(commentForm);
         return new ModelAndView("redirect:/");
     }
@@ -141,15 +177,26 @@ public class ForumController {
     /*
      * コメント編集処理
      */
-    @PutMapping("/updateComment/{id}")
+    @PutMapping("/updateComment/{id}/{messageId}")
     // 編集画面から、id および formModel の変数名で入力された投稿内容を受け取る
-    public ModelAndView updateComment (@PathVariable Integer id,
-                                       @ModelAttribute("commentModel") CommentForm comment) throws ParseException {
+    public ModelAndView updateComment (@PathVariable Integer id, @PathVariable Integer messageId,
+                                       @Validated @ModelAttribute("commentModel") CommentForm commentForm,
+                                       BindingResult result) throws ParseException {
+        if(result.hasErrors()) {
+            //エラー処理
+            ModelAndView mav = new ModelAndView("/editcomment");
+            mav.addObject("commentModel", commentForm); // フォーム内容を表示
+            return mav;
+        }
         // UrlParameterのidを更新するentityにセット
-        comment.setId(id);
+        commentForm.setId(id);
         // 編集した投稿を更新
-        commentService.saveComment(comment);
+        commentService.saveComment(commentForm);
+
         // 投稿のupdatedDateを更新
+        commentForm.setMessageId(messageId);
+        reportService.saveReportOnlyUpdatedDate(commentForm);
+
         // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
         return new ModelAndView("redirect:/");
     }

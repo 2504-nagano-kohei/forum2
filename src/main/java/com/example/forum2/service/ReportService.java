@@ -1,5 +1,6 @@
 package com.example.forum2.service;
 
+import com.example.forum2.controller.form.CommentForm;
 import com.example.forum2.controller.form.ReportForm;
 import com.example.forum2.repository.ReportRepository;
 import com.example.forum2.repository.entity.Report;
@@ -124,5 +125,23 @@ public class ReportService {
         return reports.get(0);
     }
 
+    // コメントの編集と共にreportテーブルのupdated_dateのみ更新　saveReportOnlyUpdatedDate
+    public void saveReportOnlyUpdatedDate(CommentForm comment) throws ParseException{
+        Report saveReport = setReportEntityOnlyUpdatedDate(comment);
+        reportRepository.updateUpdatedDate(saveReport.getUpdatedDate(), saveReport.getId());
+    }
+
+    // CommentFormをRepotのEntityに詰めている
+    private Report setReportEntityOnlyUpdatedDate(CommentForm comment) throws ParseException{
+        Report report = new Report();
+        report.setId(comment.getMessageId());
+
+        Date nowDate = new Date();
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String uDate = sdFormat.format(nowDate);
+        Date updatedDate = sdFormat.parse(uDate);
+        report.setUpdatedDate(updatedDate);
+        return report;
+    }
 
 }

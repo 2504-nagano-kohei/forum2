@@ -27,6 +27,7 @@
     <a href="/new">
         <button class="new-button" type="button">新規投稿</button>
     </a>
+
     <div class="message-icon" th:each="content : ${contents}">
         <div>
             <!-- th:text → 値を表示する -->
@@ -50,17 +51,14 @@
                 <input type="button" th:value="編集">
             </a>
         </div>
-        <!-- コメントエリア -->
         <div>
-            <form method="post" action="/addComment">
-                <!-- コメントエリア -->
-                <div class="comment-area">
-                    <label>コメント内容</label>
-                    <textarea class="comment-box" name="comment" size="20" maxlength="200"></textarea><br/>
-                    <input name="messageId" th:value="${content.id}" type="hidden">
-                    <!-- コメント「返信ボタン」 -->
+            <form method="post" action="/addComment" th:object="${commentModel}">
+                <textarea class="comment-box" th:field="*{comment}" size="20" maxlength="200"></textarea>
+                <input name="messageId" th:value="${content.id}" type="hidden">
+                <div>
                     <input type="submit" value="コメントする" />
                 </div>
+                <p th:errors="*{comment}" style="color:red;"></p>
             </form>
         </div>
         <!-- 投稿IDに紐づいたコメントの一覧表示 -->
