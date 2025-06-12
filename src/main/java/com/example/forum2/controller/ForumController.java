@@ -184,18 +184,19 @@ public class ForumController {
                                        BindingResult result) throws ParseException {
         if(result.hasErrors()) {
             //エラー処理
-            ModelAndView mav = new ModelAndView("/editcomment");
+            ModelAndView mav = new ModelAndView();
+            mav.setViewName("/editcomment");
             mav.addObject("commentModel", commentForm); // フォーム内容を表示
             return mav;
         }
-        // UrlParameterのidを更新するentityにセット
+
+        // UrlParameterのidを更新するFomrにセット
         commentForm.setId(id);
-        // 編集した投稿を更新
+        // 編集したコメントを更新
         commentService.saveComment(commentForm);
 
         // 投稿のupdatedDateを更新
-        commentForm.setMessageId(messageId);
-        reportService.saveReportOnlyUpdatedDate(commentForm);
+        reportService.saveReportOnlyUpdatedDate((Integer) commentForm.getMessageId());
 
         // root⑤へリダイレクト（編集が終わったら、最新の状態を画面表示）
         return new ModelAndView("redirect:/");

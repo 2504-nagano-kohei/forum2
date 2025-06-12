@@ -126,15 +126,16 @@ public class ReportService {
     }
 
     // コメントの編集と共にreportテーブルのupdated_dateのみ更新　saveReportOnlyUpdatedDate
-    public void saveReportOnlyUpdatedDate(CommentForm comment) throws ParseException{
-        Report saveReport = setReportEntityOnlyUpdatedDate(comment);
+    // トランザクション入れるならここ
+    public void saveReportOnlyUpdatedDate(Integer id) throws ParseException{
+        Report saveReport = setReportEntityOnlyUpdatedDate(id);
         reportRepository.updateUpdatedDate(saveReport.getUpdatedDate(), saveReport.getId());
     }
 
     // CommentFormをRepotのEntityに詰めている
-    private Report setReportEntityOnlyUpdatedDate(CommentForm comment) throws ParseException{
+    private Report setReportEntityOnlyUpdatedDate(Integer id) throws ParseException{
         Report report = new Report();
-        report.setId(comment.getMessageId());
+        report.setId(id);
 
         Date nowDate = new Date();
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -143,5 +144,4 @@ public class ReportService {
         report.setUpdatedDate(updatedDate);
         return report;
     }
-
 }

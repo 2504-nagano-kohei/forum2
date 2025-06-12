@@ -52,9 +52,11 @@ public class CommentService {
     /*
      * ⑧レコード追加
      */
-    public void saveComment(CommentForm reqComment) throws ParseException {
-        Comment saveComment = setCommentEntity(reqComment);
+    // トランザクション入れるならここ
+    public void saveComment(CommentForm reqCommentForm) throws ParseException {
+        Comment saveComment = setCommentEntity(reqCommentForm);
         commentRepository.save(saveComment);
+
     }
 
     /*
