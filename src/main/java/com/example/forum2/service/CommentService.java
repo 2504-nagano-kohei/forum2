@@ -56,7 +56,6 @@ public class CommentService {
     public void saveComment(CommentForm reqCommentForm) throws ParseException {
         Comment saveComment = setCommentEntity(reqCommentForm);
         commentRepository.save(saveComment);
-
     }
 
     /*
